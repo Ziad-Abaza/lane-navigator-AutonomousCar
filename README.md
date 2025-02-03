@@ -2,7 +2,7 @@
 
 This project is the beginning of an autonomous car system that uses for Reinforcement Learning (RL). It focuses on detecting lanes, calculating the vehicle's position within the lane, and applying actions such as steering and speed adjustments. This serves as an early stage for developing a fully self-driving car.
 
-![Lane Navigator](https://github.com/Ziad-Abaza/lane-navigator-AutonomousCar/blob/main/screenshots/Screenshot.png)
+![Lane Navigator](https://github.com/Ziad-Abaza/lane-navigator-AutonomousCar/blob/main/screenshots/screenshot.png)
 
 ## Technologies Used
 
