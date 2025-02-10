@@ -14,6 +14,18 @@ LaneNavigator/
 │   ├── driving_log.csv # CSV file containing driving data
 ```
 
+## Why is the Dataset Not Included?
+The `Dataset` folder is **not included in the repository** due to its large size. However, you can easily generate your own dataset using a driving simulator. The dataset consists of images and a CSV file (`driving_log.csv`) that logs steering angles and driving data.
+
+### How to Create the Dataset?
+To generate training data, use a driving simulator such as Udacity’s Self-Driving Car Simulator:
+1. **Run the simulator in training mode**.
+2. **Drive the car manually** to collect images and steering data.
+3. **Save the recorded data**, which includes:
+   - Images from center, left, and right cameras.
+   - A CSV file (`driving_log.csv`) with corresponding steering angles, throttle, brake, and speed.
+4. **Use this dataset** for training the CNN model.
+
 ## Dependencies
 Ensure you have the following dependencies installed:
 ```bash
