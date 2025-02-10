@@ -1,85 +1,92 @@
-### Lane Navigator - Autonomous Car
+# Lane Navigator using CNN
 
-This project is the beginning of an autonomous car system that uses for Reinforcement Learning (RL). It focuses on detecting lanes, calculating the vehicle's position within the lane, and applying actions such as steering and speed adjustments. This serves as an early stage for developing a fully self-driving car.
+## Overview
+This project implements a convolutional neural network (CNN) for lane navigation in autonomous driving. It includes data preprocessing, augmentation, model training, evaluation, and visualization.
 
-![Lane Navigator](https://github.com/Ziad-Abaza/lane-navigator-AutonomousCar/blob/main/screenshots/screenshot.png)
-
-## Technologies Used
-
-- **Python**: Programming language for implementing the system.
-- **OpenCV**: Used for image processing, including line detection, frame manipulation, and the Region of Interest (ROI) selection.
-- **Numpy**: Used for mathematical operations, particularly in line fitting and distance calculations.
-
-### Reward System
-
-The `RewardSystem.py` script defines the rewards and penalties the car receives based on its behavior:
-
-- **Lane Centering**: The car is rewarded for staying in the center of the lane.
-- **Speed**: A reward is given for maintaining a safe speed when near the center.
-- **Collision Penalty**: A penalty is applied if the car collides with any obstacles.
-- **Goal Achievement**: A reward is provided when the car reaches the goal.
-- **Lane Departure**: A penalty is imposed if the car moves out of the lane.
-
-### Line Detection
-
-The `LineDetection.py` script detects the lanes using OpenCV’s Hough Transform. The lines detected in the frame are filtered based on their slope to determine left and right lanes. The class also handles ROI selection using mouse events and averages the detected lines to improve accuracy.
-
-### Car Actions
-
-The `CarActions.py` script allows the car to take actions based on the state of the environment. These actions include steering adjustments and speed changes. The car can apply one of five predefined actions that influence the steering and speed.
-
-### Data Structure and Usage
-
-The state of the car is represented in the following dictionary:
-
-```python
-state = {
-    'left_lane': left_lane_coordinates,
-    'right_lane': right_lane_coordinates,
-    'offset': lane offset (m),
-    'offset_rate': change in offset per second (m/s),
-    'lane_width': width of the lane (m),
-    'left_distance': distance to the left lane (m),
-    'right_distance': distance to the right lane (m),
-    'steering_angle': calculated steering angle (degrees)
-}
+## Project Structure
+```
+LaneNavigator/
+├── utils.py           # Utility functions for data handling, augmentation, and model training
+├── training.py        # Training pipeline for the CNN model
+├── trained_model.keras # Saved trained model in Keras format
+├── Dataset/          # Folder containing training data (images and CSV log)
+│   ├── IMG/         # Image dataset
+│   ├── driving_log.csv # CSV file containing driving data
 ```
 
-This state is continuously updated as the car navigates the lane, and it is used to calculate the rewards and take actions.
+## Dependencies
+Ensure you have the following dependencies installed:
+```bash
+pip install tensorflow numpy pandas matplotlib scikit-learn imgaug opencv-python
+```
 
-### Focus Area
+## Data Preparation
+The dataset consists of images and a CSV file (`driving_log.csv`) containing:
+- **Center**: Path to the center camera image
+- **Left & Right**: Paths to side camera images
+- **Steering**: Steering angle
+- **Throttle, Brake, Speed**: Additional driving parameters
 
-The focus area for lane detection is selected manually through mouse clicks on the region of interest (ROI). A screenshot of the selection process is shown below:
+### Steps:
+1. **Load Dataset**: `import_data_info(path)` extracts image paths and steering angles.
+2. **Balance Data**: `balance_data(data)` reduces bias in steering angles.
+3. **Load Data**: `load_data(path, data)` loads images and labels.
+4. **Split Dataset**: `split_data(images_path, steerings)` splits into training/validation sets.
 
-![Select Focus Area](https://github.com/Ziad-Abaza/lane-navigator-AutonomousCar/blob/main/screenshots/select_point.png)
+## Model Architecture
+The CNN model follows a similar structure to NVIDIA’s self-driving car model:
+- **Input Layer**: Normalization (`Lambda(lambda x: x / 255.0 - 0.5)`) 
+- **Convolutional Layers**: Feature extraction with activation `elu`
+- **Dropout Layer**: Prevents overfitting
+- **Fully Connected Layers**: Predicts steering angle
 
-### How to Use
+### Model Creation
+```python
+model = create_model()
+```
 
-1. Clone this repository:
-    ```bash
-    git clone https://github.com/Ziad-Abaza/lane-navigator-AutonomousCar.git
-    ```
+## Training the Model
+### Steps:
+1. **Data Augmentation**: Random flipping, brightness adjustment, noise addition.
+2. **Batch Generation**: `batch_generator()` dynamically loads images and applies augmentation.
+3. **Train Model**:
+```python
+history = model.fit(
+    train_generator,
+    steps_per_epoch=len(x_train) // batch_size,
+    validation_data=val_generator,
+    validation_steps=len(x_val) // batch_size,
+    epochs=10
+)
+```
+4. **Loss Visualization**:
+```python
+plot_loss(history)
+```
 
-2. Run the main script:
-    ```bash
-    python main.py
-    ```
+## Model Saving & Loading
+- **Save Model**: `save_model(model, 'trained_model')`
+- **Load Model**: `loaded_model = load_trained_model('trained_model')`
 
-3. Use mouse clicks to define the Region of Interest (ROI) in the frame for lane detection.
+## Visualization
+- **Sample Augmented Images**:
+```python
+sample_images, sample_labels = next(train_generator)
+display_images(sample_images[:5], sample_labels[:5], 'Sample Augmented Images')
+```
+- **Steering Angle Distribution**:
+```python
+plot_steering_distribution(y_train)
+```
 
-4. The car will begin navigating within the detected lanes, and you can observe its actions and rewards through the output.
+## Running the Project
+To train the model, execute:
+```bash
+python training.py
+```
+This will load data, train the CNN model, visualize results, and save the trained model.
 
-### Future Development
-
-This is just the first step toward building a fully autonomous car. Future improvements will include:
-
-- Integration of deeper Reinforcement Learning models for better decision-making.
-- More sophisticated lane detection algorithms using deep learning.
-- Simulation of real-world conditions like road curves and obstacles.
-- Integration with self-driving car platforms for real-time testing.
-
-Feel free to contribute to the project. Any improvements, ideas, or suggestions are welcome!
-
-### License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Future Improvements
+- Integrate real-time testing with a simulator.
+- Implement reinforcement learning for adaptive steering.
+- Optimize model for embedded deployment (Raspberry Pi, Jetson Nano).
